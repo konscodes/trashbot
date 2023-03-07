@@ -11,6 +11,7 @@ handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
 
 @app.route("/")
 def test():
+    print(request.headers)
     return 'OK'
 
 @app.route("/callback", methods=['POST'])
