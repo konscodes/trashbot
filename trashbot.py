@@ -15,6 +15,7 @@ def test():
 
 @app.route("/callback", methods=['POST'])
 def callback():
+    print(request.headers)
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
