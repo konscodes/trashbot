@@ -3,6 +3,13 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import os
+from logging.config import dictConfig
+import json
+
+with open("./loggig_conf.json") as json_data:
+    data = json.loads(json_data)
+
+dictConfig(data)
 
 app = Flask(__name__)
 
@@ -11,12 +18,12 @@ handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
 
 @app.route("/")
 def test():
-    print(request.headers)
+    app.logger.info(request.headers)
     return 'OK'
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    print(request.headers)
+    app.logger.info(request.headers)
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -28,7 +35,7 @@ def callback():
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
-        print("Invalid signature. Please check your channel access token/channel secret.")
+        app.logger.exception("Invalid signature. Please check your channel access token/channel secret.")
         abort(400)
     return 'OK'
 
