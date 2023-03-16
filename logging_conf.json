@@ -16,7 +16,7 @@
         "file": {
             "class": "logging.FileHandler",
             "formatter": "simple",
-            "filename": "/opt/python/log/logger.log"
+            "filename": "/var/log/python/logger.log"
         },
         "wsgi": {
             "class": "logging.StreamHandler",
