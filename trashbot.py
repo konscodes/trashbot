@@ -8,8 +8,9 @@ import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+APP_DIR = BASE_DIR + '/current' if BASE_DIR == '/var/app' else BASE_DIR + '/trashbot'
 
-with open(BASE_DIR + '/trashbot/logging_conf.json', 'r') as json_data:
+with open(APP_DIR + '/logging_conf.json', 'r') as json_data:
     data = json.load(json_data)
 
 dictConfig(data)
