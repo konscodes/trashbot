@@ -4,19 +4,22 @@
         "simple": {
             "format": "[%(levelname)s] %(asctime)s: %(message)s",
             "datefmt": "%Y/%m/%d %H:%M:%S"
+        },
+        "extended": {
+            "format": "[%(levelname)s] by %(name)s at %(asctime)s: %(message)s",
+            "datefmt": "%Y/%m/%d %H:%M:%S"
         }
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": "ERROR",
-            "formatter": "simple",
+            "formatter": "extended",
             "stream": "ext://sys.stdout"
         },
         "file": {
             "class": "logging.FileHandler",
-            "formatter": "simple",
-            "filename": "/opt/python/log/logger.log"
+            "formatter": "extended",
+            "filename": "{filename}"
         },
         "wsgi": {
             "class": "logging.StreamHandler",
@@ -29,10 +32,16 @@
         "AppLogger": {
             "level": "DEBUG",
             "handlers": ["file"],
-            "propagate": "no"
+            "propagate": false
+        },
+        "root": {
+            "level": "INFO",
+            "handlers": ["console"]
+        },
+        "trashbot": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": false
         }
-    },
-    "root": {
-        "handlers": ["wsgi"]
     }
 }
