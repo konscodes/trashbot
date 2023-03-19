@@ -29,7 +29,7 @@
         }
     },
     "loggers": {
-        "AppLogger": {
+        "custom": {
             "level": "DEBUG",
             "handlers": ["file"],
             "propagate": false

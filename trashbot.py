@@ -21,7 +21,7 @@ with open(BASE_DIR + '/logging_conf.json', 'r') as f:
 app = Flask(__name__)
 
 # We will use specific loggers for different log messages
-app_logger = logging.getLogger('AppLogger')
+custom_logger = logging.getLogger('custom')
 root_logger = logging.getLogger('root')
 flask_logger = logging.getLogger('trashbot')
 
@@ -31,29 +31,24 @@ handler = WebhookHandler(str(environ.get('LINE_CHANNEL_SECRET')))
 
 @app.route("/")
 def test():
-    app_logger.error("This message should go to file")    
-    flask_logger.error("This message should go to both file and console")
-    flask_logger.info("This message should go to both file and console")
-    flask_logger.debug("This message should go to both file and console")
-    root_logger.info("This message should go to console")
-    #app_logger.info(request.headers)
+    custom_logger.info(f"Request headers: \n{request.headers}")
     return 'OK'
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    app_logger.info(request.headers)
+    custom_logger.info(f"Request headers: \n{request.headers}")
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
     # get request body as text
     body = request.get_data(as_text=True)
-    app_logger.info("Request body: " + body)
+    custom_logger.info("Request body: " + body)
 
     # handle webhook body
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
-        app.logger.exception("Invalid signature. Please check your channel access token/channel secret.")
+        custom_logger.exception("Invalid signature. Please check your channel access token/channel secret.")
         abort(400)
     return 'OK'
 
