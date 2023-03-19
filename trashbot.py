@@ -10,7 +10,7 @@ import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = dirname(abspath(__file__))
-LOG_PATH = '/opt/python/log/logger.log'
+LOG_PATH = BASE_DIR + '/logs/logger.log'
 
 # Read JSON and configure logging using dictionary
 with open(BASE_DIR + '/logging_conf.json', 'r') as f:
