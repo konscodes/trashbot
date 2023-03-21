@@ -31,12 +31,12 @@ handler = WebhookHandler(str(environ.get('LINE_CHANNEL_SECRET')))
 
 @app.route('/')
 def test():
-    #custom_logger.debug('Request headers: \n' + request.headers)
+    custom_logger.debug(f'Request headers: \n{request.headers}')
     return 'OK'
 
 @app.route('/callback', methods=['POST'])
 def callback():
-    custom_logger.debug('Request headers: \n' + request.headers)
+    custom_logger.debug(f'Request headers: \n{request.headers}')
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
