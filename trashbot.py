@@ -15,7 +15,7 @@ LOG_PATH = BASE_DIR + '/logs/logger.log'
 # Read JSON and configure logging using dictionary
 with open(BASE_DIR + '/logging_conf.json', 'r') as f:
     data = json.load(f)
-    data["handlers"]["file"]["filename"] = LOG_PATH
+    data["handlers"]["file"]["filename"] = '/opt/python/log/logger.log'
     logging.config.dictConfig(data)
 
 app = Flask(__name__)
