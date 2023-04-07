@@ -1,14 +1,14 @@
 '''This bot will send a reoccurring reminders on garbage collection schedule'''
-from os.path import dirname, abspath
-from os import environ
 import json
 import logging
 import logging.config
+from os import environ
+from os.path import abspath, dirname
+
+from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from flask import Flask, request, abort
-
 
 # Build paths inside the project
 BASE_DIR = dirname(abspath(__file__))
@@ -58,7 +58,6 @@ def callback():
         abort(400)
     return 'OK'
 
-# Main bot function
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     '''This function will handle all messages sent to the bot'''
