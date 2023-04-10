@@ -131,7 +131,7 @@ dmypy.json
 
 # Replit
 .replit
-replit.nixy
+replit*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
