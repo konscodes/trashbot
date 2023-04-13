@@ -30,6 +30,10 @@ flask_logger = logging.getLogger('trashbot')
 # Line API requires a token for access and handler needs secret
 line_bot_api = LineBotApi(str(environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
 handler = WebhookHandler(str(environ.get('LINE_CHANNEL_SECRET')))
+custom_logger.debug('Line token: %s',
+                    str(environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
+custom_logger.debug('Line secret: %s', str(environ.get('LINE_CHANNEL_SECRET')))
+
 
 @app.route('/')
 def test():
@@ -37,6 +41,7 @@ def test():
     custom_logger.debug('This is a test')
     #custom_logger.debug(f'Request headers: \n{request.headers}')
     return 'OK'
+
 
 @app.route('/callback', methods=['POST'])
 def callback():
@@ -58,12 +63,13 @@ def callback():
         abort(400)
     return 'OK'
 
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     '''This function will handle all messages sent to the bot'''
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=event.message.text))
+    line_bot_api.reply_message(event.reply_token,
+                               TextSendMessage(text=event.message.text))
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
