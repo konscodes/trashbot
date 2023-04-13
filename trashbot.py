@@ -2,9 +2,11 @@
 import json
 import logging
 import logging.config
+import time
 from os import environ
 from os.path import abspath, dirname
 
+import schedule
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -70,6 +72,24 @@ def handle_message(event):
     line_bot_api.reply_message(event.reply_token,
                                TextSendMessage(text=event.message.text))
 
+
+# Define function to send message
+def send_message(group_id, message):
+    # Send the message to the group
+    line_bot_api.push_message(group_id, message)
+
+
+# Set up message to be sent
+message = TextSendMessage(text='Hello, this is a weekly reminder!')
+
+# Schedule the task to run every week
+schedule.every().minute.do(
+    lambda: send_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message))
+
+# Keep the script running
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
