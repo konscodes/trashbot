@@ -4,14 +4,12 @@ import logging
 import logging.config
 import os
 
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, abort, request
-
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
 # Build paths inside the project
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
