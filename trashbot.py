@@ -124,7 +124,7 @@ if __name__ == '__main__':
     scheduler.start()
 
     try:
-        # This is here to simulate application activity (which keeps the main thread alive)
+        # This is here to simulate application activity (keeps the main thread alive)
         app.run(host='0.0.0.0', port=5000)
     except (KeyboardInterrupt, SystemExit):
         # Handle keyboard interrupts or system exits by shutting down the scheduler
