@@ -10,6 +10,7 @@ from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from json_data import rotate_duty
 
 # Create a new Flask instance
 app = Flask(__name__)
@@ -80,6 +81,7 @@ if __name__ == '__main__':
     # Build paths inside the project
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_PATH = BASE_DIR + '/logs/logger.log'
+    DUTY_PATH = BASE_DIR + '/data.json'
 
     # Read JSON and configure logging using dictionary
     with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
@@ -107,6 +109,14 @@ if __name__ == '__main__':
         timezone='Asia/Tokyo',
         id='001',
         name='Duty reminder')
+    
+    scheduler.add_job(
+        lambda: rotate_duty(DUTY_PATH, 'Groceries'),
+        trigger='interval',
+        seconds=30,
+        timezone='Asia/Tokyo',
+        id='001',
+        name='Duty rotation')
     custom_logger.debug(scheduler.get_jobs())
 
     # Configure the scheduler
