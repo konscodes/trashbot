@@ -22,7 +22,9 @@
     },
     {
       "name": "Team 2",
-      "duty": [],
+      "duty": [
+        "Groceries"
+      ],
       "rooms": [
         {
           "room": "B202",
@@ -164,9 +166,7 @@
     },
     {
       "name": "Team 9",
-      "duty": [
-        "Groceries"
-      ],
+      "duty": [],
       "rooms": [
         {
           "room": "B102",

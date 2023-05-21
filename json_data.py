@@ -10,36 +10,25 @@ This snippet shows how to read and write json data.
 - Write the dictionary back to the json file.
 '''
 import json
+import logging
+custom_logger = logging.getLogger('custom')
 
-def check_duty(teams: list, specific_duty) -> tuple:
+def check_duty(file_path: str, specific_duty) -> tuple:
     '''Check who is on duty and return the team name and team id.
-    teams: list of teams from data file
+    file_path: data file with a list of teams
     specific_duty: duty to check e.g. "Garbage"
     '''
+    with open(file_path) as file_object:
+        data = json.load(file_object)
+    teams = data['teams']
     for team_id, team in enumerate(teams):
         if specific_duty in team['duty']:
-            print(f"Team {team['name']} is on {specific_duty} duty.")
-            print(f"Members: {[x['person']['english'] for x in team['rooms']]}")
-            return team['name'], team_id 
+            custom_logger.debug(f"Team {team['name']} is on {specific_duty} duty.")
+            custom_logger.debug(
+                f"Members: {[x['person']['english'] for x in team['rooms']]}")
+            return team['name'], team_id
     print(f"{specific_duty} duty is not found.")
     return None, -1
-
-
-def update_duty(teams: list, duty: str) -> list:
-    '''Rotate the duty for the next team and returns the updated teams list.
-    teams: list of teams from data file
-    duty: duty to rotate e.g. "Garbage"
-    '''
-    team_on_duty, team_on_duty_id = check_duty(teams, duty)
-    if team_on_duty:
-        teams[team_on_duty_id]['duty'].remove(duty)
-        if team_on_duty_id < len(teams) - 1:
-            teams[team_on_duty_id + 1]['duty'].append(duty)
-        else:
-            teams[0]['duty'].append(duty)
-        return teams
-    print('No duty to rotate.')
-    return teams
 
 
 def check_schedule(duties: list, duty: str) -> str:
@@ -57,27 +46,19 @@ def rotate_duty(file_path: str, duty: str) -> None:
     '''
     with open(file_path) as file_object:
         data = json.load(file_object)
-    updated_roster = update_duty(data['teams'], duty)
-    data['teams'] = updated_roster
+
+    team_on_duty, team_on_duty_id = check_duty(file_path, duty)
+    if team_on_duty:
+        data['teams'][team_on_duty_id]['duty'].remove(duty)
+        if team_on_duty_id < len(data['teams']) - 1:
+            data['teams'][team_on_duty_id + 1]['duty'].append(duty)
+        else:
+            data['teams'][0]['duty'].append(duty)
+
     with open(file_path, 'w') as file_object:
         json.dump(data, file_object, indent=2, ensure_ascii=False)
     return 'OK'
 
 
 if __name__ == '__main__':
-    import os
-
-    PATENT_DIR = os.path.dirname(os.path.abspath(__file__))
-    FILE = os.path.dirname(PATENT_DIR) + '/files/data.json'
-
-    # Read the json data from the file.
-    with open(FILE) as file_object:
-        data = json.load(file_object)
-
-    updated_roster = update_duty(data['teams'], 'Groceries')
-    data['teams'] = updated_roster
-    print(check_schedule(data['duties'], 'Garbage'))
-
-    # Write the dictionary back to the json file.
-    with open(FILE, 'w') as file_object:
-        json.dump(data, file_object, indent=2, ensure_ascii=False)
+    pass
