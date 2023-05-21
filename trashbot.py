@@ -11,39 +11,19 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
-# Build paths inside the project
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOG_PATH = BASE_DIR + '/logs/logger.log'
-
-# Read JSON and configure logging using dictionary
-with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
-    data['handlers']['file']['filename'] = LOG_PATH
-    logging.config.dictConfig(data)
-
 # Create a new Flask instance
 app = Flask(__name__)
 
 # Create a new Scheduler instance
 scheduler = BackgroundScheduler()
 
-# Scheduler configuration
-jobstores = {'default': {'type': 'memory'}}
-executors = {'default': {'type': 'threadpool', 'max_workers': 10}}
-job_defaults = {'max_instances': 3}
-
-# We will use specific loggers for different log messages
-custom_logger = logging.getLogger('custom')
-root_logger = logging.getLogger('root')
-flask_logger = logging.getLogger('trashbot')
-
 # Line API requires a token for access and handler needs secret
 line_bot_api = LineBotApi(str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
 handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
-custom_logger.debug('Line token: %s',
-                    str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
-custom_logger.debug('Line secret: %s',
-                    str(os.environ.get('LINE_CHANNEL_SECRET')))
+#custom_logger.debug('Line token: %s',
+#                    str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
+#custom_logger.debug('Line secret: %s',
+#                    str(os.environ.get('LINE_CHANNEL_SECRET')))
 
 
 def scheduler_listener(event):
@@ -97,6 +77,21 @@ def send_message(group_id, message):
 
 
 if __name__ == '__main__':
+    # Build paths inside the project
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    LOG_PATH = BASE_DIR + '/logs/logger.log'
+
+    # Read JSON and configure logging using dictionary
+    with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        data['handlers']['file']['filename'] = LOG_PATH
+        logging.config.dictConfig(data)
+
+    # We will use specific loggers for different log messages
+    custom_logger = logging.getLogger('custom')
+    root_logger = logging.getLogger('root')
+    flask_logger = logging.getLogger('trashbot')
+
     # Add listener to log the execution for debugging purposes
     scheduler.add_listener(scheduler_listener,
                            EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
@@ -116,15 +111,20 @@ if __name__ == '__main__':
 
     # Configure the scheduler
     # After the scheduler has been started, you can no longer alter its settings
-    scheduler.configure(jobstores=jobstores,
-                        executors=executors,
-                        job_defaults=job_defaults)
+    scheduler.configure(
+        jobstores={'default': {
+            'type': 'memory'
+        }},
+        executors={'default': {
+            'type': 'threadpool',
+            'max_workers': 10
+        }},
+        job_defaults={'max_instances': 3})
 
     # Start the scheduler
     scheduler.start()
 
     try:
-        # This is here to simulate application activity (keeps the main thread alive)
         app.run(host='0.0.0.0', port=5000)
     except (KeyboardInterrupt, SystemExit):
         # Handle keyboard interrupts or system exits by shutting down the scheduler
