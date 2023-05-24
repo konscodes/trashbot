@@ -55,9 +55,9 @@ def rotate_duty(file_path: str, duty: str) -> None:
         else:
             data['teams'][0]['duty'].append(duty)
 
-    with open(file_path, 'w') as file_object:
-        json.dump(data, file_object, indent=2, ensure_ascii=False)
-    return 'OK'
+        with open(file_path, 'w') as file_object:
+            json.dump(data, file_object, indent=2, ensure_ascii=False)
+    return team_on_duty, team_on_duty_id
 
 
 if __name__ == '__main__':

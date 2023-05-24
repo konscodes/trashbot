@@ -10,29 +10,25 @@ from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from json_data import rotate_duty
+import roster
 
 # Create a new Flask instance
 app = Flask(__name__)
 
-# Create a new Scheduler instance
-scheduler = BackgroundScheduler()
-
 # Line API requires a token for access and handler needs secret
 line_bot_api = LineBotApi(str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
 handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
-#custom_logger.debug('Line token: %s',
-#                    str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
-#custom_logger.debug('Line secret: %s',
-#                    str(os.environ.get('LINE_CHANNEL_SECRET')))
 
+# Create a new Scheduler instance
+scheduler = BackgroundScheduler()
 
+# Define functions
 def scheduler_listener(event):
     '''Listens for execution and crash events and logs the message'''
     if event.exception:
-        custom_logger.exception('The job crashed %s', event.exception)
+        custom_logger.exception('The job %s crashed %s' % (event.job_id, event.exception))
     else:
-        custom_logger.info('The job worked')
+        custom_logger.info('The job %s worked' % event.job_id)
 
 
 @app.route('/')
@@ -71,9 +67,8 @@ def handle_message(event):
                                TextSendMessage(text=event.message.text))
 
 
-# Define function to send message
 def send_message(group_id, message):
-    # Send the message to the group
+    '''Send the message to the group'''
     line_bot_api.push_message(group_id, message)
 
 
@@ -81,7 +76,7 @@ if __name__ == '__main__':
     # Build paths inside the project
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_PATH = BASE_DIR + '/logs/logger.log'
-    DATA_PATH = BASE_DIR + '/data.json'
+    ROSTER_PATH = BASE_DIR + '/roster_data.json'
 
     # Read JSON and configure logging using dictionary
     with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
@@ -110,7 +105,7 @@ if __name__ == '__main__':
         id='001',
         name='Duty reminder')
 
-    scheduler.add_job(lambda: rotate_duty(DATA_PATH, 'Groceries'),
+    scheduler.add_job(lambda: roster.rotate_duty(ROSTER_PATH, 'Groceries'),
                       trigger='interval',
                       seconds=30,
                       timezone='Asia/Tokyo',
