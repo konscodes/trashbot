@@ -78,6 +78,9 @@ def handle_rotation_output(output):
     team_name, team_id, members, duty_name = output
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
     custom_logger.info('Members: %s', members)
+    message = TextSendMessage(
+        text=f'Team {team_id} is on {duty_name} duty.\nMembers: {members}')
+    line_bot_api.push_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message)
 
 
 if __name__ == '__main__':
@@ -101,12 +104,10 @@ if __name__ == '__main__':
     scheduler.add_listener(scheduler_listener,
                            EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
-    # Set up message to be sent
-    message = TextSendMessage(text='Hello, this is a weekly reminder!')
-
     # Add jobs here and print pending jobs
     scheduler.add_job(
-        lambda: send_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message),
+        lambda: send_message('Cd8838ffe33ac87f0595ac2be8ce6579f', 
+                             TextSendMessage(text='This is a weekly reminder!')),
         trigger='interval',
         seconds=30,
         timezone='Asia/Tokyo',
