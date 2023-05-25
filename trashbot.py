@@ -26,9 +26,11 @@ scheduler = BackgroundScheduler()
 def scheduler_listener(event):
     '''Listens for execution and crash events and logs the message'''
     if event.exception:
-        custom_logger.exception('The job %s crashed %s' % (event.job_id, event.exception))
+        custom_logger.exception('The job %s (%s) crashed: %s', 
+            event.job_id, scheduler.get_job(event.job_id).name, event.exception)
     else:
-        custom_logger.info('The job %s worked' % event.job_id)
+        custom_logger.info('The job %s (%s) worked', 
+            event.job_id, scheduler.get_job(event.job_id).name)
 
 
 @app.route('/')
@@ -72,6 +74,12 @@ def send_message(group_id, message):
     line_bot_api.push_message(group_id, message)
 
 
+def handle_rotation_output(output):
+    team_name, team_id, members, duty_name = output
+    custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
+    custom_logger.info('Members: %s', members)
+
+
 if __name__ == '__main__':
     # Build paths inside the project
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -105,12 +113,14 @@ if __name__ == '__main__':
         id='001',
         name='Duty reminder')
 
-    scheduler.add_job(lambda: roster.rotate_duty(ROSTER_PATH, 'Groceries'),
-                      trigger='interval',
-                      seconds=30,
-                      timezone='Asia/Tokyo',
-                      id='002',
-                      name='Duty rotation')
+    scheduler.add_job(
+        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Groceries')),
+        trigger='interval',
+        seconds=30,
+        timezone='Asia/Tokyo',
+        id='002',
+        name='Duty rotation')
+
     custom_logger.debug(scheduler.get_jobs())
 
     # Configure the scheduler

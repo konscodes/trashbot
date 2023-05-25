@@ -23,11 +23,10 @@ def check_duty(file_path: str, specific_duty) -> tuple:
     teams = data['teams']
     for team_id, team in enumerate(teams):
         if specific_duty in team['duty']:
-            custom_logger.debug(f"Team {team['name']} is on {specific_duty} duty.")
-            custom_logger.debug(
-                f"Members: {[x['person']['english'] for x in team['rooms']]}")
-            return team['name'], team_id
-    print(f"{specific_duty} duty is not found.")
+            team_name = team['name']
+            members = [x['person']['english'] for x in team['rooms']]
+            return team_name, team_id, members
+    custom_logger.error('Duty %s is not found.', specific_duty)
     return None, -1
 
 
@@ -47,7 +46,7 @@ def rotate_duty(file_path: str, duty: str) -> None:
     with open(file_path) as file_object:
         data = json.load(file_object)
 
-    team_on_duty, team_on_duty_id = check_duty(file_path, duty)
+    team_on_duty, team_on_duty_id, members_on_duty = check_duty(file_path, duty)
     if team_on_duty:
         data['teams'][team_on_duty_id]['duty'].remove(duty)
         if team_on_duty_id < len(data['teams']) - 1:
@@ -57,7 +56,7 @@ def rotate_duty(file_path: str, duty: str) -> None:
 
         with open(file_path, 'w') as file_object:
             json.dump(data, file_object, indent=2, ensure_ascii=False)
-    return team_on_duty, team_on_duty_id
+    return team_on_duty, team_on_duty_id, members_on_duty, duty
 
 
 if __name__ == '__main__':
