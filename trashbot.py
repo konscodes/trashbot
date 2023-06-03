@@ -65,8 +65,14 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     '''This function will handle all messages sent to the bot'''
-    line_bot_api.reply_message(event.reply_token,
-                               TextSendMessage(text=event.message.text))
+    if event.message.text == '!start':
+        scheduler.resume()
+        line_bot_api.reply_message(event.reply_token,
+                               TextSendMessage(text='Starting the scheduler'))
+    if event.message.text == '!stop':
+        scheduler.pause()
+        line_bot_api.reply_message(event.reply_token,
+                               TextSendMessage(text='Pausing the scheduler'))
 
 
 def send_message(group_id, message):
