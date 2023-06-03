@@ -1,0 +1,198 @@
+{
+  "teams": [
+    {
+      "name": "Team 1",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "B104",
+          "person": {
+            "english": "Aya",
+            "japanese": "アヤ"
+          }
+        },
+        {
+          "room": "B201",
+          "person": {
+            "english": "Hanna",
+            "japanese": "ハンナ"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 2",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "B202",
+          "person": {
+            "english": "Marina",
+            "japanese": "まりな"
+          }
+        },
+        {
+          "room": "B203",
+          "person": {
+            "english": "Astrid",
+            "japanese": "アスター"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 3",
+      "duty": [
+        "Groceries"
+      ],
+      "rooms": [
+        {
+          "room": "B204",
+          "person": {
+            "english": "Haruki",
+            "japanese": "春貴"
+          }
+        },
+        {
+          "room": "A101",
+          "person": {
+            "english": "Gregory",
+            "japanese": "グレゴリー"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 4",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "A102-1",
+          "person": {
+            "english": "Yusei",
+            "japanese": "勇成"
+          }
+        },
+        {
+          "room": "A102-2",
+          "person": {
+            "english": "Florian",
+            "japanese": "フロリアン"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 5",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "A201",
+          "person": {
+            "english": "Yuta",
+            "japanese": "優太"
+          }
+        },
+        {
+          "room": "A202",
+          "person": {
+            "english": "Yuka",
+            "japanese": "由佳"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 6",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "A203",
+          "person": {
+            "english": "Shonosuke",
+            "japanese": "祥之介"
+          }
+        },
+        {
+          "room": "A204",
+          "person": {
+            "english": "Siyun",
+            "japanese": "シユン"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 7",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "A205",
+          "person": {
+            "english": "Diana",
+            "japanese": "ダヤナ"
+          }
+        },
+        {
+          "room": "B101",
+          "person": {
+            "english": "Hiro",
+            "japanese": "大和"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 8",
+      "duty": [
+        "Garbage"
+      ],
+      "rooms": [
+        {
+          "room": "A206-1",
+          "person": {
+            "english": "Aika",
+            "japanese": "愛香"
+          }
+        },
+        {
+          "room": "A206-2",
+          "person": {
+            "english": "Revy",
+            "japanese": "レヴィ"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Team 9",
+      "duty": [],
+      "rooms": [
+        {
+          "room": "B102",
+          "person": {
+            "english": "Rodrigo",
+            "japanese": "ロド"
+          }
+        },
+        {
+          "room": "B103",
+          "person": {
+            "english": "Ricky",
+            "japanese": "リッキー"
+          }
+        }
+      ]
+    }
+  ],
+  "duties": [
+    {
+      "name": "Groceries",
+      "schedule": "monthly"
+    },
+    {
+      "name": "Garbage",
+      "schedule": "weekly"
+    }
+  ]
+}

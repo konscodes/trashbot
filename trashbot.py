@@ -10,28 +10,27 @@ from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import roster
 
 # Create a new Flask instance
 app = Flask(__name__)
 
-# Create a new Scheduler instance
-scheduler = BackgroundScheduler()
-
 # Line API requires a token for access and handler needs secret
 line_bot_api = LineBotApi(str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
 handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
-#custom_logger.debug('Line token: %s',
-#                    str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
-#custom_logger.debug('Line secret: %s',
-#                    str(os.environ.get('LINE_CHANNEL_SECRET')))
 
+# Create a new Scheduler instance
+scheduler = BackgroundScheduler()
 
+# Define functions
 def scheduler_listener(event):
     '''Listens for execution and crash events and logs the message'''
     if event.exception:
-        custom_logger.exception('The job crashed %s', event.exception)
+        custom_logger.exception('The job %s (%s) crashed: %s', 
+            event.job_id, scheduler.get_job(event.job_id).name, event.exception)
     else:
-        custom_logger.info('The job worked')
+        custom_logger.info('The job %s (%s) worked', 
+            event.job_id, scheduler.get_job(event.job_id).name)
 
 
 @app.route('/')
@@ -70,16 +69,25 @@ def handle_message(event):
                                TextSendMessage(text=event.message.text))
 
 
-# Define function to send message
 def send_message(group_id, message):
-    # Send the message to the group
+    '''Send the message to the group'''
     line_bot_api.push_message(group_id, message)
+
+
+def handle_rotation_output(output):
+    team_name, team_id, members, duty_name = output
+    custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
+    custom_logger.info('Members: %s', members)
+    message = TextSendMessage(
+        text=f'Team {team_id} is on {duty_name} duty.\nMembers: {members}')
+    line_bot_api.push_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message)
 
 
 if __name__ == '__main__':
     # Build paths inside the project
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_PATH = BASE_DIR + '/logs/logger.log'
+    ROSTER_PATH = BASE_DIR + '/roster_data.json'
 
     # Read JSON and configure logging using dictionary
     with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
@@ -96,17 +104,24 @@ if __name__ == '__main__':
     scheduler.add_listener(scheduler_listener,
                            EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
-    # Set up message to be sent
-    message = TextSendMessage(text='Hello, this is a weekly reminder!')
-
     # Add jobs here and print pending jobs
     scheduler.add_job(
-        lambda: send_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message),
+        lambda: send_message('Cd8838ffe33ac87f0595ac2be8ce6579f', 
+                             TextSendMessage(text='This is a weekly reminder!')),
         trigger='interval',
         seconds=30,
         timezone='Asia/Tokyo',
         id='001',
         name='Duty reminder')
+
+    scheduler.add_job(
+        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Groceries')),
+        trigger='interval',
+        seconds=30,
+        timezone='Asia/Tokyo',
+        id='002',
+        name='Duty rotation')
+
     custom_logger.debug(scheduler.get_jobs())
 
     # Configure the scheduler
