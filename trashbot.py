@@ -21,6 +21,13 @@ handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
 
 # Create a new Scheduler instance
 scheduler = BackgroundScheduler()
+commands = {'!help': {'description': 'Show available commands',
+                      'text': 'Here is the list of all commands: '},
+            '!start': {'description': 'Start the scheduler',
+                      'text': 'かしこまりました！ Let me set the schedule.'},
+            '!stop': {'description': 'Pause the scheduler',
+                      'text': 'かしこまりました！ Pausing the rotation for now.'},
+            }
 
 # Define functions
 def scheduler_listener(event):
@@ -68,11 +75,18 @@ def handle_message(event):
     if event.message.text == '!start':
         scheduler.resume()
         line_bot_api.reply_message(event.reply_token,
-                               TextSendMessage(text='Starting the scheduler'))
+            TextSendMessage(text=commands['!start']['text']))
     if event.message.text == '!stop':
         scheduler.pause()
         line_bot_api.reply_message(event.reply_token,
-                               TextSendMessage(text='Pausing the scheduler'))
+            TextSendMessage(text=commands['!stop']['text']))
+    if event.message.text == '!help':
+        output = ''
+        for command, data in commands.items():
+            description = data['description']
+            output += f'{command} - {description}\n'
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
 
 
 def send_message(group_id, message):
