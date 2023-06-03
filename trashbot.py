@@ -24,9 +24,9 @@ scheduler = BackgroundScheduler()
 commands = {'!help': {'description': 'Show available commands',
                       'text': 'Here is the list of all commands: '},
             '!start': {'description': 'Start the scheduler',
-                      'text': 'かしこまりました！ Let me set the schedule.'},
+                      'text': 'かしこまりました！\nLet me set your schedule.'},
             '!stop': {'description': 'Pause the scheduler',
-                      'text': 'かしこまりました！ Pausing the rotation for now.'},
+                      'text': 'かしこまりました！\nPausing the rotation for now.'},
             }
 
 # Define functions
@@ -72,6 +72,10 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     '''This function will handle all messages sent to the bot'''
+    global GROUP_ID
+    if GROUP_ID is None:
+        GROUP_ID = event.source.group_id
+
     if event.message.text == '!start':
         scheduler.resume()
         line_bot_api.reply_message(event.reply_token,
@@ -89,11 +93,6 @@ def handle_message(event):
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
 
 
-def send_message(group_id, message):
-    '''Send the message to the group'''
-    line_bot_api.push_message(group_id, message)
-
-
 def handle_rotation_output(output):
     team_name, team_id, members, duty_name = output
     member_names = ', '.join(members)
@@ -101,7 +100,7 @@ def handle_rotation_output(output):
     custom_logger.info('Members: %s', member_names)
     message = TextSendMessage(
         text=f'Team {team_id} is on {duty_name} duty.\nMembers: {member_names}')
-    line_bot_api.push_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message)
+    line_bot_api.push_message(GROUP_ID, message)
 
 
 if __name__ == '__main__':
@@ -109,6 +108,7 @@ if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_PATH = BASE_DIR + '/logs/logger.log'
     ROSTER_PATH = BASE_DIR + '/roster_data.json'
+    GROUP_ID = None
 
     # Read JSON and configure logging using dictionary
     with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
