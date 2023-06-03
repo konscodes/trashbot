@@ -107,20 +107,11 @@ if __name__ == '__main__':
 
     # Add jobs here and print pending jobs
     scheduler.add_job(
-        lambda: send_message('Cd8838ffe33ac87f0595ac2be8ce6579f', 
-                             TextSendMessage(text='This is a weekly reminder!')),
-        trigger='interval',
-        seconds=30,
-        timezone='Asia/Tokyo',
-        id='001',
-        name='Duty reminder')
-
-    scheduler.add_job(
         lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Groceries')),
         trigger='interval',
         seconds=30,
         timezone='Asia/Tokyo',
-        id='002',
+        id='001',
         name='Duty rotation')
 
     custom_logger.debug(scheduler.get_jobs())
@@ -138,7 +129,7 @@ if __name__ == '__main__':
         job_defaults={'max_instances': 3})
 
     # Start the scheduler
-    scheduler.start()
+    scheduler.start(paused=True)
 
     try:
         app.run(host='0.0.0.0', port=5000)
