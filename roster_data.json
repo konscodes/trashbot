@@ -185,14 +185,9 @@
       ]
     }
   ],
-  "duties": [
-    {
-      "name": "Groceries",
-      "schedule": "monthly"
-    },
-    {
-      "name": "Garbage",
-      "schedule": "weekly"
-    }
-  ]
+  "duties": {
+      "Groceries": "monthly",
+      "Garbage": "weekly"
+  },
+  "updated": ""
 }
