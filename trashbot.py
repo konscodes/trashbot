@@ -76,10 +76,11 @@ def send_message(group_id, message):
 
 def handle_rotation_output(output):
     team_name, team_id, members, duty_name = output
+    member_names = ', '.join(members)
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
-    custom_logger.info('Members: %s', members)
+    custom_logger.info('Members: %s', member_names)
     message = TextSendMessage(
-        text=f'Team {team_id} is on {duty_name} duty.\nMembers: {members}')
+        text=f'Team {team_id} is on {duty_name} duty.\nMembers: {member_names}')
     line_bot_api.push_message('Cd8838ffe33ac87f0595ac2be8ce6579f', message)
 
 
