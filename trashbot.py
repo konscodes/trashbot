@@ -10,7 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, JoinEvent, SourceGroup
 import roster
 
 # Create a new Flask instance
@@ -110,6 +110,16 @@ def handle_message(event):
                 TextSendMessage(text='Ready to report!'
                             f'\nThis week\'s {duty_name} duty members: {member_names}'))
                 break  # Stop iterating once a matching duty is found
+
+
+@handler.add(JoinEvent)
+def handle_group_joined(event):
+    if isinstance(event.source, SourceGroup):
+        group_id = event.source.group_id
+
+        # Send a welcome message to the group
+        welcome_message = "Thank you for adding me to this group! I'm here to assist you with your tasks."
+        line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
 
 
 def handle_rotation_output(output):
