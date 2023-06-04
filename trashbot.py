@@ -121,9 +121,7 @@ def handle_message(event):
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
         group_id = event.source.group_id
-        welcome_message = 'Thank you for adding me to this group!'
-        'I\'m here to assist you with your tasks.'
-        '\nTry !help to see the list of available commands.'
+        welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.\nTry !help to see the list of available commands.'
         line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
 
 
