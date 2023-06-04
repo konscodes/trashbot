@@ -3,6 +3,7 @@ import json
 import logging
 import logging.config
 import os
+import re
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -94,12 +95,14 @@ def handle_message(event):
             output += f'{command} - {description}\n'
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
-    if event.message.text == 'trashbot':
+        
+    if re.search(r"(?i)(trashbot).*?(garbage)", event.message.text):
         team_name, team_id, members = roster.check_duty(ROSTER_PATH, 'Garbage')
         member_names = ', '.join(members)
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text='Ready to report!'
-                            f'\nThis weeks Garbage duty members: {member_names}'))
+                        f'\nThis week\'s Garbage duty members: {member_names}'))
+
 
 
 def handle_rotation_output(output):
