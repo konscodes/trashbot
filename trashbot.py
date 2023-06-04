@@ -29,7 +29,7 @@ commands = {'!help': {'description': 'Show available commands',
                       'text': 'かしこまりました！\nLet me set your schedule.'},
             '!stop': {'description': 'Pause the scheduler',
                       'text': 'かしこまりました！\nPausing the rotation for now.'},
-            'trashbot + duty name': {'description': 'Report who is on duty'}
+            '!duty': {'description': 'Report who is on duty'}
             }
 
 # Define functions
@@ -107,17 +107,27 @@ def handle_message(event):
         output = output.rstrip('\n')
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text='You can also mention trashbot and duty name to check who is scheduled.'))
     
     if 'trashbot' in event.message.text.lower():
         for duty_name in duties.keys():
             if duty_name.lower() in event.message.text.lower():
                 team_name, team_id, members = roster.check_duty(ROSTER_PATH, duty_name)
                 member_names = ', '.join(members)
+                duty_frequency = duties[duty_name]
                 line_bot_api.reply_message(event.reply_token,
                 TextSendMessage(text='Ready to report!'
-                            f'\nThis week\'s {duty_name} duty members: {member_names}'))
+                            f'\nScheduled {duty_frequency} {duty_name} duty members: {member_names}'))
                 break  # Stop iterating once a matching duty is found
-
+    
+    if event.message.text == '!duty':
+        for duty_name in duties.keys():
+            team_name, team_id, members = roster.check_duty(ROSTER_PATH, duty_name)
+            member_names = ', '.join(members)
+            duty_frequency = duties[duty_name]
+            line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text=f'Scheduled {duty_frequency} {duty_name} duty members: {member_names}'))
 
 @handler.add(JoinEvent)
 def handle_group_joined(event):
