@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, GroupSummary
 import roster
 
 # Create a new Flask instance
@@ -73,8 +73,10 @@ def callback():
 def handle_message(event):
     '''This function will handle all messages sent to the bot'''
     global GROUP_ID
+    global GROUP_NAME
     if GROUP_ID is None:
         GROUP_ID = event.source.group_id
+        GROUP_NAME = line_bot_api.get_group_summary(GROUP_ID).group_name
 
     if event.message.text == '!start':
         scheduler.resume()
@@ -99,7 +101,9 @@ def handle_rotation_output(output):
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
     custom_logger.info('Members: %s', member_names)
     message = TextSendMessage(
-        text=f'Team {team_id} is on {duty_name} duty.\nMembers: {member_names}')
+    text=f'Good morning dear people of {GROUP_NAME}!'
+         f'\nTeam {team_id} is on {duty_name} duty.'
+         f'\nMembers: {member_names}')
     line_bot_api.push_message(GROUP_ID, message)
 
 
@@ -109,6 +113,7 @@ if __name__ == '__main__':
     LOG_PATH = BASE_DIR + '/logs/logger.log'
     ROSTER_PATH = BASE_DIR + '/roster_data.json'
     GROUP_ID = None
+    GROUP_NAME = ''
 
     # Read JSON and configure logging using dictionary
     with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
