@@ -97,10 +97,9 @@ def handle_message(event):
         output = ''
         for command, data in commands.items():
             description = data['description']
-            output += f'<b>{command}</b> - {description}\n'
+            output += f'\u200c{command}\u200c - {description}\n'
         line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}', 
-                            parse_mode='HTML'))
+            TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
     
     if 'trashbot' in event.message.text.lower():
         for duty_name in duties.keys():
