@@ -121,9 +121,10 @@ def handle_message(event):
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
         group_id = event.source.group_id
-        welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.\nTry !help to see the list of available commands.'
+        welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.'
+        help_message = 'Try !help to see the list of available commands.'
         line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
-
+        line_bot_api.push_message(group_id, TextSendMessage(text=help_message))
 
 def handle_rotation_output(output):
     team_name, team_id, members, duty_name = output
