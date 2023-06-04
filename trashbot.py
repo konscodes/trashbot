@@ -10,7 +10,8 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, JoinEvent, SourceGroup
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import JoinEvent, SourceGroup
 import roster
 
 # Create a new Flask instance
@@ -76,9 +77,13 @@ def handle_message(event):
     '''This function will handle all messages sent to the bot'''
     global GROUP_ID
     global GROUP_NAME
-    if GROUP_ID is None:
-        GROUP_ID = event.source.group_id
-        GROUP_NAME = line_bot_api.get_group_summary(GROUP_ID).group_name
+    if event.source.type == 'group':
+        if GROUP_ID is None:
+            GROUP_ID = event.source.group_id
+            group_summary = line_bot_api.get_group_summary(GROUP_ID)
+            GROUP_NAME = group_summary.group_name
+    else:
+        pass
     
     duties = {
         "Groceries": "monthly",
@@ -116,9 +121,9 @@ def handle_message(event):
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
         group_id = event.source.group_id
-
-        # Send a welcome message to the group
-        welcome_message = "Thank you for adding me to this group! I'm here to assist you with your tasks."
+        welcome_message = 'Thank you for adding me to this group!'
+        'I\'m here to assist you with your tasks.'
+        '\nTry !help to see the list of available commands.'
         line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
 
 
