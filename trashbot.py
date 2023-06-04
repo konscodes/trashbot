@@ -103,6 +103,8 @@ def handle_message(event):
         for command, data in commands.items():
             description = data['description']
             output += f'{command} - {description}\n'
+        # Remove the last newline character from the output
+        output = output.rstrip('\n')
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
     
