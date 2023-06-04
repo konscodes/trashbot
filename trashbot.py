@@ -97,7 +97,7 @@ def handle_message(event):
         output = ''
         for command, data in commands.items():
             description = data['description']
-            output += f'\u200c{command}\u200c - {description}\n'
+            output += f'{command} - {description}\n'
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
     
