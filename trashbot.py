@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, GroupSummary
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import roster
 
 # Create a new Flask instance
