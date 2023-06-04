@@ -3,7 +3,6 @@ import json
 import logging
 import logging.config
 import os
-import re
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -29,6 +28,7 @@ commands = {'!help': {'description': 'Show available commands',
                       'text': 'かしこまりました！\nLet me set your schedule.'},
             '!stop': {'description': 'Pause the scheduler',
                       'text': 'かしこまりました！\nPausing the rotation for now.'},
+            'trashbot + duty name': {'description': 'Report who is on duty'}
             }
 
 # Define functions
@@ -79,7 +79,12 @@ def handle_message(event):
     if GROUP_ID is None:
         GROUP_ID = event.source.group_id
         GROUP_NAME = line_bot_api.get_group_summary(GROUP_ID).group_name
-
+    
+    duties = {
+        "Groceries": "monthly",
+        "Garbage": "weekly"
+    }
+    
     if event.message.text == '!start':
         scheduler.resume()
         line_bot_api.reply_message(event.reply_token,
@@ -95,14 +100,16 @@ def handle_message(event):
             output += f'{command} - {description}\n'
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
-        
-    if re.search(r"(?i)(trashbot).*?(garbage)", event.message.text):
-        team_name, team_id, members = roster.check_duty(ROSTER_PATH, 'Garbage')
-        member_names = ', '.join(members)
-        line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text='Ready to report!'
-                        f'\nThis week\'s Garbage duty members: {member_names}'))
-
+    
+    if 'trashbot' in event.message.text.lower():
+        for duty_name in duties.keys():
+            if duty_name.lower() in event.message.text.lower():
+                team_name, team_id, members = roster.check_duty(ROSTER_PATH, duty_name)
+                member_names = ', '.join(members)
+                line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text='Ready to report!'
+                            f'\nThis week\'s {duty_name} duty members: {member_names}'))
+                break  # Stop iterating once a matching duty is found
 
 
 def handle_rotation_output(output):
