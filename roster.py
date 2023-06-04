@@ -16,7 +16,7 @@ from datetime import datetime
 custom_logger = logging.getLogger('custom')
 
 def check_duty(file_path: str, specific_duty) -> tuple:
-    '''Check who is on duty and return the team name and team id.
+    '''Check who is on duty and return the team name, team id and members.
     file_path: data file with a list of teams
     specific_duty: duty to check e.g. "Garbage"
     '''

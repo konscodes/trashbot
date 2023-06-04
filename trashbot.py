@@ -6,6 +6,7 @@ import os
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -51,13 +52,13 @@ def test():
 @app.route('/callback', methods=['POST'])
 def callback():
     '''This is the main function that handles the webhook'''
-    custom_logger.debug('Request headers: \n%s', request.headers)
+    #custom_logger.debug('Request headers: \n%s', request.headers)
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
     # get request body as text
     body = request.get_data(as_text=True)
-    custom_logger.debug('Request body: \n%s', body)
+    #custom_logger.debug('Request body: \n%s', body)
 
     # handle webhook body
     try:
@@ -93,6 +94,12 @@ def handle_message(event):
             output += f'{command} - {description}\n'
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
+    if event.message.text == 'trashbot':
+        team_name, team_id, members = roster.check_duty(ROSTER_PATH, 'Garbage')
+        member_names = ', '.join(members)
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text='Ready to report!'
+                            f'\nThis weeks Garbage duty members: {member_names}'))
 
 
 def handle_rotation_output(output):
@@ -132,13 +139,17 @@ if __name__ == '__main__':
 
     # Add jobs here and print pending jobs
     scheduler.add_job(
-        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Groceries')),
-        trigger='interval',
-        seconds=30,
-        timezone='Asia/Tokyo',
+        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
+        trigger=CronTrigger(day_of_week='mon', hour=9, timezone='Asia/Tokyo'),
         id='001',
-        name='Duty rotation')
+        name='Duty rotation weekly')
 
+    scheduler.add_job(
+        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Groceries')),
+        trigger=CronTrigger(day='1st mon', hour=9, timezone='Asia/Tokyo'),
+        id='002',
+        name='Duty rotation monthly')
+    
     custom_logger.debug(scheduler.get_jobs())
 
     # Configure the scheduler
