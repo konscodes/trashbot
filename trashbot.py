@@ -107,9 +107,9 @@ def handle_message(event):
         output = output.rstrip('\n')
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
-        line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text='You can also mention trashbot and duty name to check who is scheduled.'))
-    
+        addon_message = 'You can also mention trashbot and duty name to check who is scheduled.'
+        line_bot_api.push_message(GROUP_ID, TextSendMessage(text=addon_message))
+
     if 'trashbot' in event.message.text.lower():
         for duty_name in duties.keys():
             if duty_name.lower() in event.message.text.lower():
@@ -126,7 +126,7 @@ def handle_message(event):
             team_name, team_id, members = roster.check_duty(ROSTER_PATH, duty_name)
             member_names = ', '.join(members)
             duty_frequency = duties[duty_name]
-            line_bot_api.reply_message(event.reply_token,
+            line_bot_api.push_message(GROUP_ID,
                 TextSendMessage(text=f'Scheduled {duty_frequency} {duty_name} duty members: {member_names}'))
 
 @handler.add(JoinEvent)
