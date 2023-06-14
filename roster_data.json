@@ -96,8 +96,8 @@
         {
           "room": "A202",
           "person": {
-            "english": "Yuka",
-            "japanese": "由佳"
+            "english": "Maya",
+            "japanese": "マヤ"
           }
         }
       ]
@@ -109,8 +109,8 @@
         {
           "room": "A203",
           "person": {
-            "english": "Shonosuke",
-            "japanese": "祥之介"
+            "english": "",
+            "japanese": ""
           }
         },
         {
@@ -151,8 +151,8 @@
         {
           "room": "A206-1",
           "person": {
-            "english": "Aika",
-            "japanese": "愛香"
+            "english": "Mizuki",
+            "japanese": "ミズキ"
           }
         },
         {
@@ -189,5 +189,5 @@
       "Groceries": "monthly",
       "Garbage": "weekly"
   },
-  "updated": "2023-06-03 22:29:25.312117"
+  "updated": "2023-06-13 22:29:25.312117"
 }
