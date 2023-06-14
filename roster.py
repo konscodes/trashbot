@@ -15,6 +15,7 @@ from datetime import datetime
 
 custom_logger = logging.getLogger('custom')
 
+
 def check_duty(file_path: str, specific_duty) -> tuple:
     '''Check who is on duty and return the team name, team id and members.
     file_path: data file with a list of teams
@@ -26,7 +27,10 @@ def check_duty(file_path: str, specific_duty) -> tuple:
     for team_id, team in enumerate(teams):
         if specific_duty in team['duty']:
             team_name = team['name']
-            members = [x['person']['english'] for x in team['rooms']]
+            members = [
+                x['person']['english'] for x in team['rooms']
+                if x['person']['english'] != ''
+            ]
             return team_name, team_id, members
     custom_logger.error('Duty %s is not found.', specific_duty)
     return None, -1
@@ -63,10 +67,11 @@ def rotate_duty(file_path: str, duty: str) -> None:
     '''
     with open(file_path) as file_object:
         data = json.load(file_object)
-    
+
     schedule = data['duties'][duty]
-    team_on_duty, team_on_duty_id, members_on_duty = check_duty(file_path, duty)
-    
+    team_on_duty, team_on_duty_id, members_on_duty = check_duty(
+        file_path, duty)
+
     if team_on_duty:
         current = datetime.now()
         last = datetime.strptime(data['updated'], '%Y-%m-%d %H:%M:%S.%f')

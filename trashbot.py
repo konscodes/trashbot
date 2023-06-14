@@ -10,8 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from linebot.models import JoinEvent, SourceGroup
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, JoinEvent, SourceGroup
 import roster
 
 # Create a new Flask instance
@@ -23,24 +22,35 @@ handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
 
 # Create a new Scheduler instance
 scheduler = BackgroundScheduler()
-commands = {'!help': {'description': 'Show available commands',
-                      'text': 'Here is the list of all commands: '},
-            '!start': {'description': 'Start the scheduler',
-                      'text': 'かしこまりました！\nLet me set your schedule.'},
-            '!stop': {'description': 'Pause the scheduler',
-                      'text': 'かしこまりました！\nPausing the rotation for now.'},
-            '!duty': {'description': 'Report who is on duty'}
-            }
+commands = {
+    '!help': {
+        'description': 'Show available commands',
+        'text': 'Here is the list of all commands: '
+    },
+    '!start': {
+        'description': 'Start the scheduler',
+        'text': 'かしこまりました！\nLet me set your schedule.'
+    },
+    '!stop': {
+        'description': 'Pause the scheduler',
+        'text': 'かしこまりました！\nPausing the rotation for now.'
+    },
+    '!duty': {
+        'description': 'Report who is on duty'
+    }
+}
+
 
 # Define functions
 def scheduler_listener(event):
     '''Listens for execution and crash events and logs the message'''
     if event.exception:
-        custom_logger.exception('The job %s (%s) crashed: %s', 
-            event.job_id, scheduler.get_job(event.job_id).name, event.exception)
+        custom_logger.exception('The job %s (%s) crashed: %s', event.job_id,
+                                scheduler.get_job(event.job_id).name,
+                                event.exception)
     else:
-        custom_logger.info('The job %s (%s) worked', 
-            event.job_id, scheduler.get_job(event.job_id).name)
+        custom_logger.info('The job %s (%s) worked', event.job_id,
+                           scheduler.get_job(event.job_id).name)
 
 
 @app.route('/')
@@ -84,20 +94,18 @@ def handle_message(event):
             GROUP_NAME = group_summary.group_name
     else:
         pass
-    
-    duties = {
-        "Groceries": "monthly",
-        "Garbage": "weekly"
-    }
-    
+
+    duties = {"Groceries": "monthly", "Garbage": "weekly"}
+
     if event.message.text == '!start':
         scheduler.resume()
-        line_bot_api.reply_message(event.reply_token,
+        line_bot_api.reply_message(
+            event.reply_token,
             TextSendMessage(text=commands['!start']['text']))
     if event.message.text == '!stop':
         scheduler.pause()
-        line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text=commands['!stop']['text']))
+        line_bot_api.reply_message(
+            event.reply_token, TextSendMessage(text=commands['!stop']['text']))
     if event.message.text == '!help':
         output = ''
         for command, data in commands.items():
@@ -105,29 +113,41 @@ def handle_message(event):
             output += f'{command} - {description}\n'
         # Remove the last newline character from the output
         output = output.rstrip('\n')
-        line_bot_api.reply_message(event.reply_token,
+        line_bot_api.reply_message(
+            event.reply_token,
             TextSendMessage(text=f'{commands["!help"]["text"]}\n{output}'))
         addon_message = 'You can also mention trashbot and duty name to check who is scheduled.'
-        line_bot_api.push_message(GROUP_ID, TextSendMessage(text=addon_message))
+        line_bot_api.push_message(GROUP_ID,
+                                  TextSendMessage(text=addon_message))
 
     if 'trashbot' in event.message.text.lower():
         for duty_name in duties.keys():
             if duty_name.lower() in event.message.text.lower():
-                team_name, team_id, members = roster.check_duty(ROSTER_PATH, duty_name)
+                team_name, team_id, members = roster.check_duty(
+                    ROSTER_PATH, duty_name)
                 member_names = ', '.join(members)
                 duty_frequency = duties[duty_name]
-                line_bot_api.reply_message(event.reply_token,
-                TextSendMessage(text='Ready to report!'
-                            f'\nScheduled {duty_frequency} {duty_name} duty members: {member_names}'))
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text='Ready to report!'
+                        f'\nScheduled {duty_frequency} {duty_name} duty members: {member_names}'
+                    ))
                 break  # Stop iterating once a matching duty is found
-    
+
     if event.message.text == '!duty':
         for duty_name in duties.keys():
-            team_name, team_id, members = roster.check_duty(ROSTER_PATH, duty_name)
+            team_name, team_id, members = roster.check_duty(
+                ROSTER_PATH, duty_name)
             member_names = ', '.join(members)
             duty_frequency = duties[duty_name]
-            line_bot_api.push_message(GROUP_ID,
-                TextSendMessage(text=f'Scheduled {duty_frequency} {duty_name} duty members: {member_names}'))
+            line_bot_api.push_message(
+                GROUP_ID,
+                TextSendMessage(
+                    text=
+                    f'Scheduled {duty_frequency} {duty_name} duty members: {member_names}'
+                ))
+
 
 @handler.add(JoinEvent)
 def handle_group_joined(event):
@@ -135,18 +155,19 @@ def handle_group_joined(event):
         group_id = event.source.group_id
         welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.'
         help_message = 'Try !help to see the list of available commands.'
-        line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
+        line_bot_api.push_message(group_id,
+                                  TextSendMessage(text=welcome_message))
         line_bot_api.push_message(group_id, TextSendMessage(text=help_message))
+
 
 def handle_rotation_output(output):
     team_name, team_id, members, duty_name = output
     member_names = ', '.join(members)
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
     custom_logger.info('Members: %s', member_names)
-    message = TextSendMessage(
-    text=f'Good morning dear people of {GROUP_NAME}!'
-         f'\nTeam {team_id} is on {duty_name} duty.'
-         f'\nMembers: {member_names}')
+    message = TextSendMessage(text=f'Good morning dear people of {GROUP_NAME}!'
+                              f'\nTeam {team_id} is on {duty_name} duty.'
+                              f'\nMembers: {member_names}')
     line_bot_api.push_message(GROUP_ID, message)
 
 
@@ -174,18 +195,22 @@ if __name__ == '__main__':
                            EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
     # Add jobs here and print pending jobs
-    scheduler.add_job(
-        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
-        trigger=CronTrigger(day_of_week='mon', hour=9, timezone='Asia/Tokyo'),
-        id='001',
-        name='Duty rotation weekly')
+    scheduler.add_job(lambda: handle_rotation_output(
+        roster.rotate_duty(ROSTER_PATH, 'Garbage')),
+                      trigger=CronTrigger(day_of_week='mon',
+                                          hour=9,
+                                          timezone='Asia/Tokyo'),
+                      id='001',
+                      name='Duty rotation weekly')
 
-    scheduler.add_job(
-        lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Groceries')),
-        trigger=CronTrigger(day='1st mon', hour=9, timezone='Asia/Tokyo'),
-        id='002',
-        name='Duty rotation monthly')
-    
+    scheduler.add_job(lambda: handle_rotation_output(
+        roster.rotate_duty(ROSTER_PATH, 'Groceries')),
+                      trigger=CronTrigger(day='1st mon',
+                                          hour=9,
+                                          timezone='Asia/Tokyo'),
+                      id='002',
+                      name='Duty rotation monthly')
+
     custom_logger.debug(scheduler.get_jobs())
 
     # Configure the scheduler
