@@ -71,7 +71,7 @@ def scheduler_listener(event):
 @app.route('/')
 def test():
     '''This is a test function to check if the bot is running'''
-    custom_logger.debug('Route / test')
+    custom_logger.debug(f'Route / test, name: {__name__}')
     #custom_logger.debug(f'Request headers: \n{request.headers}')
     return 'OK'
 
