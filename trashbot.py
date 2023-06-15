@@ -19,9 +19,14 @@ app = Flask(__name__)
 # Line API requires a token for access and handler needs secret
 line_bot_api = LineBotApi(str(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')))
 handler = WebhookHandler(str(os.environ.get('LINE_CHANNEL_SECRET')))
-
-# Create a new Scheduler instance
 scheduler = BackgroundScheduler()
+
+# Build paths inside the project
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_PATH = BASE_DIR + '/logs/logger.log'
+ROSTER_PATH = BASE_DIR + '/roster_data.json'
+GROUP_ID = None
+GROUP_NAME = ''
 commands = {
     '!help': {
         'description': 'Show available commands',
@@ -40,6 +45,16 @@ commands = {
     }
 }
 
+# Read JSON and configure logging using dictionary
+with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+    data['handlers']['file']['filename'] = LOG_PATH
+    logging.config.dictConfig(data)
+
+# We will use specific loggers for different log messages
+custom_logger = logging.getLogger('custom')
+root_logger = logging.getLogger('root')
+flask_logger = logging.getLogger('trashbot')
 
 # Define functions
 def scheduler_listener(event):
@@ -172,24 +187,6 @@ def handle_rotation_output(output):
 
 
 if __name__ == '__main__':
-    # Build paths inside the project
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    LOG_PATH = BASE_DIR + '/logs/logger.log'
-    ROSTER_PATH = BASE_DIR + '/roster_data.json'
-    GROUP_ID = None
-    GROUP_NAME = ''
-
-    # Read JSON and configure logging using dictionary
-    with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        data['handlers']['file']['filename'] = LOG_PATH
-        logging.config.dictConfig(data)
-
-    # We will use specific loggers for different log messages
-    custom_logger = logging.getLogger('custom')
-    root_logger = logging.getLogger('root')
-    flask_logger = logging.getLogger('trashbot')
-
     # Add listener to log the execution for debugging purposes
     scheduler.add_listener(scheduler_listener,
                            EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
