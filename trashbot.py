@@ -10,7 +10,8 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, abort, request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, JoinEvent, SourceGroup
+from linebot.models import (MessageEvent, TextMessage, TextSendMessage, 
+                            JoinEvent, SourceGroup)
 import roster
 
 # Create a new Flask instance
@@ -81,6 +82,7 @@ def test():
 @app.route('/callback', methods=['POST'])
 def callback():
     '''This is the main function that handles the webhook'''
+    custom_logger.debug('Callback accessed')
     #custom_logger.debug('Request headers: \n%s', request.headers)
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
@@ -91,6 +93,7 @@ def callback():
 
     # handle webhook body
     try:
+        custom_logger.debug('Calling handler')
         handler.handle(body, signature)
     except InvalidSignatureError:
         custom_logger.exception('Invalid signature. \
@@ -105,17 +108,20 @@ def handle_message(event):
     if event.source.type == 'group':
         if group_info['id'] is None:
             group_info['id'] = event.source.group_id
+            custom_logger.debug('Accessing API: get group summary')
             group_summary = line_bot_api.get_group_summary(group_info['id'])
             group_info['name'] = group_summary.group_name
     
     if event.message.text == '!start':
         scheduler.resume()
+        custom_logger.debug(f'Accessing API: reply message {event.message.text}')
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=COMMANDS['!start']['text']))
     
     if event.message.text == '!stop':
         scheduler.pause()
+        custom_logger.debug(f'Accessing API: reply message {event.message.text}')
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=COMMANDS['!stop']['text']))
     
@@ -126,10 +132,12 @@ def handle_message(event):
             output += f'{command} - {description}\n'
         # Remove the last newline character from the output
         output = output.rstrip('\n')
+        custom_logger.debug(f'Accessing API: reply message {event.message.text}')
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=f'{COMMANDS["!help"]["text"]}\n{output}'))
-        addon_message = 'You can also mention trashbot and duty name to check who is scheduled.'
+        addon_message = 'You can also mention trashbot and duty name'
+        custom_logger.debug('Accessing API: push message')
         line_bot_api.push_message(group_info['id'],
                                   TextSendMessage(text=addon_message))
 
@@ -140,11 +148,13 @@ def handle_message(event):
                     ROSTER_PATH, duty_name)
                 member_names = ', '.join(members)
                 duty_frequency = DUTIES[duty_name]
+                custom_logger.debug('Accessing API: reply freeform message')
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
                         text='Ready to report!'
-                        f'\nScheduled {duty_frequency} {duty_name} duty members: {member_names}'
+                        f'\nScheduled {duty_frequency} {duty_name} '
+                        f'duty members: {member_names}'
                     ))
                 break  # Stop iterating once a matching duty is found
 
@@ -154,11 +164,13 @@ def handle_message(event):
                 ROSTER_PATH, duty_name)
             member_names = ', '.join(members)
             duty_frequency = DUTIES[duty_name]
+            custom_logger.debug(f'Accessing API: push message {event.message.text}')
             line_bot_api.push_message(
                 group_info['id'],
                 TextSendMessage(
                     text=
-                    f'Scheduled {duty_frequency} {duty_name} duty members: {member_names}'
+                    f'Scheduled {duty_frequency} {duty_name} '
+                    f'duty members: {member_names}'
                 ))
 
 
@@ -166,10 +178,13 @@ def handle_message(event):
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
         group_id = event.source.group_id
-        welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.'
+        welcome_message = ('Thank you for adding me to this group! ', 
+                           'I\'m here to assist you with your tasks.')
         help_message = 'Try !help to see the list of available commands.'
+        custom_logger.debug('Accessing API: push message Group join')
         line_bot_api.push_message(group_id,
                                   TextSendMessage(text=welcome_message))
+        custom_logger.debug('Accessing API: push message Group join')
         line_bot_api.push_message(group_id, TextSendMessage(text=help_message))
 
 
@@ -181,6 +196,7 @@ def handle_rotation_output(output):
     message = TextSendMessage(text=f'Good morning dear people of {group_info["name"]}!'
                               f'\nTeam {team_id} is on {duty_name} duty.'
                               f'\nMembers: {member_names}')
+    custom_logger.debug('Accessing API: push message Rotation notification')
     line_bot_api.push_message(group_info['id'], message)
 
 
