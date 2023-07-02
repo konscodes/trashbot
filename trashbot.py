@@ -131,21 +131,19 @@ def handle_message(event):
             event.reply_token, TextSendMessage(text=COMMANDS['!stop']['text']))
 
     if event.message.text == '!help':
-        output = ''
+        all_commands = ''
         for command, data in COMMANDS.items():
             description = data['description']
-            output += f'{command} - {description}\n'
-        # Remove the last newline character from the output
-        output = output.rstrip('\n')
+            all_commands += f'{command} - {description}\n'
+        # Remove the last newline character from the all_commands
+        all_commands = all_commands.rstrip('\n')
+        help_message = TextSendMessage(text=f'{COMMANDS["!help"]["text"]}\n{all_commands}')
+        addon_message = TextSendMessage(text='You can also mention trashbot and duty name')
         custom_logger.debug(
             f'Accessing API: reply message {event.message.text}')
         line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f'{COMMANDS["!help"]["text"]}\n{output}'))
-        addon_message = 'You can also mention trashbot and duty name'
-        custom_logger.debug('Accessing API: push message')
-        line_bot_api.push_message(group_info['id'],
-                                  TextSendMessage(text=addon_message))
+            event.reply_token,[help_message, addon_message])
+        
 
     if 'trashbot' in event.message.text.lower():
         for duty_name in DUTIES.keys():
@@ -180,19 +178,15 @@ def handle_message(event):
 @handler.add(JoinEvent)
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
-        group_id = event.source.group_id
         welcome_message = TextSendMessage(text='Thank you for adding me to this group! I\'m here to assist you with your tasks.')
         help_message = TextSendMessage(text='Try !help to see the list of available commands.')
-        custom_logger.debug('Accessing API: push message Group join')
         messages = [welcome_message, help_message]
+        custom_logger.debug('Accessing API: reply message Group join')
         line_bot_api.reply_message(event.reply_token, messages)
-        #line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
-        custom_logger.debug('Accessing API: push message Group join')
-        #line_bot_api.push_message(group_id, TextSendMessage(text=help_message))
 
 
-def handle_rotation_output(output):
-    team_name, team_id, members, duty_name = output
+def handle_rotation_all_commands(all_commands):
+    team_name, team_id, members, duty_name = all_commands
     member_names = ', '.join(members)
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
     custom_logger.info('Members: %s', member_names)
@@ -210,12 +204,12 @@ scheduler.add_listener(scheduler_listener,
 
 # Add jobs here and print pending jobs
 scheduler.add_job(
-    lambda: handle_rotation_output(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
+    lambda: handle_rotation_all_commands(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
     trigger=CronTrigger(day_of_week='mon', hour=9, timezone='Asia/Tokyo'),
     id='001',
     name='Duty rotation weekly')
 
-scheduler.add_job(lambda: handle_rotation_output(
+scheduler.add_job(lambda: handle_rotation_all_commands(
     roster.rotate_duty(ROSTER_PATH, 'Groceries')),
                   trigger=CronTrigger(day='1st mon',
                                       hour=9,
