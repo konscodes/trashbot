@@ -184,10 +184,11 @@ def handle_group_joined(event):
         welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.'
         help_message = 'Try !help to see the list of available commands.'
         custom_logger.debug('Accessing API: push message Group join')
-        line_bot_api.push_message(group_id,
-                                  TextSendMessage(text=welcome_message))
+        messages = [welcome_message, help_message]
+        line_bot_api.reply_message(event.reply_token, messages)
+        #line_bot_api.push_message(group_id, TextSendMessage(text=welcome_message))
         custom_logger.debug('Accessing API: push message Group join')
-        line_bot_api.push_message(group_id, TextSendMessage(text=help_message))
+        #line_bot_api.push_message(group_id, TextSendMessage(text=help_message))
 
 
 def handle_rotation_output(output):
