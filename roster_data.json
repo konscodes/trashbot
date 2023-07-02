@@ -2,7 +2,7 @@
   "teams": [
     {
       "name": "Team 1",
-      "duty": ["Garbage"],
+      "duty": [],
       "rooms": [
         {
           "room": "B104",
@@ -162,7 +162,7 @@
     },
     {
       "name": "Team 9",
-      "duty": [],
+      "duty": ["Garbage"],
       "rooms": [
         {
           "room": "B102",
