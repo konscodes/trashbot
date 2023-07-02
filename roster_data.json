@@ -2,13 +2,13 @@
   "teams": [
     {
       "name": "Team 1",
-      "duty": [],
+      "duty": ["Garbage"],
       "rooms": [
         {
           "room": "B104",
           "person": {
-            "english": "Aya",
-            "japanese": "アヤ"
+            "english": "",
+            "japanese": ""
           }
         },
         {
@@ -42,9 +42,7 @@
     },
     {
       "name": "Team 3",
-      "duty": [
-        
-      ],
+      "duty": [],
       "rooms": [
         {
           "room": "B204",
@@ -64,7 +62,7 @@
     },
     {
       "name": "Team 4",
-      "duty": [],
+      "duty": ["Groceries"],
       "rooms": [
         {
           "room": "A102-1",
@@ -96,21 +94,21 @@
         {
           "room": "A202",
           "person": {
-            "english": "Maya",
-            "japanese": "マヤ"
+            "english": "Kai",
+            "japanese": "海舟"
           }
         }
       ]
     },
     {
       "name": "Team 6",
-      "duty": ["Garbage"],
+      "duty": [],
       "rooms": [
         {
           "room": "A203",
           "person": {
-            "english": "",
-            "japanese": ""
+            "english": "Maya",
+            "japanese": "マヤ"
           }
         },
         {
@@ -144,9 +142,7 @@
     },
     {
       "name": "Team 8",
-      "duty": [
-        
-      ],
+      "duty": [],
       "rooms": [
         {
           "room": "A206-1",
@@ -158,15 +154,15 @@
         {
           "room": "A206-2",
           "person": {
-            "english": "Revy",
-            "japanese": "レヴィ"
+            "english": "Jessica",
+            "japanese": "ジェシカ"
           }
         }
       ]
     },
     {
       "name": "Team 9",
-      "duty": ["Groceries"],
+      "duty": [],
       "rooms": [
         {
           "room": "B102",
@@ -189,5 +185,5 @@
       "Groceries": "monthly",
       "Garbage": "weekly"
   },
-  "updated": "2023-06-13 22:29:25.312117"
+  "updated": "2023-06-26 22:29:25.312117"
 }
