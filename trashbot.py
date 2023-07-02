@@ -181,8 +181,8 @@ def handle_message(event):
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
         group_id = event.source.group_id
-        welcome_message = 'Thank you for adding me to this group! I\'m here to assist you with your tasks.'
-        help_message = 'Try !help to see the list of available commands.'
+        welcome_message = TextSendMessage(text='Thank you for adding me to this group! I\'m here to assist you with your tasks.')
+        help_message = TextSendMessage(text='Try !help to see the list of available commands.')
         custom_logger.debug('Accessing API: push message Group join')
         messages = [welcome_message, help_message]
         line_bot_api.reply_message(event.reply_token, messages)
