@@ -170,8 +170,7 @@ def handle_message(event):
             duty_frequency = DUTIES[duty_name]
             custom_logger.debug(
                 f'Accessing API: reply message {event.message.text}')
-            duty_message += TextSendMessage(text=f'Scheduled {duty_frequency} {duty_name} '
-                                f'duty members: {member_names}')
+            duty_message.append(TextSendMessage(text=f'Scheduled {duty_frequency} {duty_name} duty members: {member_names}'))
         line_bot_api.reply_message(event.reply_token, duty_message)
 
 
