@@ -168,9 +168,8 @@ def handle_message(event):
             member_names = ', '.join(members)
             duty_frequency = DUTIES[duty_name]
             custom_logger.debug(
-                f'Accessing API: push message {event.message.text}')
-            line_bot_api.push_message(
-                group_info['id'],
+                f'Accessing API: reply message {event.message.text}')
+            line_bot_api.reply_message(event.reply_token,
                 TextSendMessage(text=f'Scheduled {duty_frequency} {duty_name} '
                                 f'duty members: {member_names}'))
 
