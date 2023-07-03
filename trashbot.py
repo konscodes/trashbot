@@ -204,12 +204,11 @@ scheduler.add_listener(scheduler_listener,
 # Add jobs here and print pending jobs
 scheduler.add_job(
     lambda: handle_rotation_all_commands(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
-    trigger=CronTrigger(day_of_week='mon', hour=9, timezone='Asia/Tokyo'),
+    trigger=CronTrigger(day_of_week='mon', hour=9, minute=45, timezone='Asia/Tokyo'),
     id='001',
     name='Duty rotation weekly')
 
-scheduler.add_job(lambda: handle_rotation_all_commands(
-    roster.rotate_duty(ROSTER_PATH, 'Groceries')),
+scheduler.add_job(lambda: roster.rotate_duty(ROSTER_PATH, 'Groceries'),
                   trigger=CronTrigger(day='1st mon',
                                       hour=9,
                                       timezone='Asia/Tokyo'),
@@ -231,7 +230,7 @@ scheduler.configure(
     job_defaults={'max_instances': 3})
 
 # Start the scheduler
-scheduler.start(paused=True)
+scheduler.start(paused=False)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
