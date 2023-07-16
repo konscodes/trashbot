@@ -31,7 +31,7 @@ def check_duty(file_path: str, specific_duty) -> tuple:
                 x['person']['english'] for x in team['rooms']
                 if x['person']['english'] != ''
             ]
-            return team_name, team_id, members
+            return team_name, team_id, members, specific_duty
     custom_logger.error('Duty %s is not found.', specific_duty)
     return None, -1
 
