@@ -46,7 +46,7 @@ def check_schedule(duties: list, duty: str) -> str:
 
 def time_difference(start_time: object, end_time: object) -> tuple:
     '''Return the time difference between two dates in weeks and months'''
-    difference = end_time - start_time
+    difference = end_time.date() - start_time.date()
     weeks = difference.days // 7
     months = difference.days // 30
     return weeks, months
@@ -81,7 +81,7 @@ def rotate_duty(file_path: str, duty: str) -> tuple:
             print(f'team ID {team_on_duty_id}')
             print(f'Weeks:  {weeks}')
             new_id = rotate_index(team_on_duty_id, weeks, len(data['teams']))
-            print('New ID: {new_id}')
+            print(f'New ID: {new_id}')
         elif schedule == 'monthly':
             new_id = rotate_index(team_on_duty_id, months, len(data['teams']))
         data['teams'][team_on_duty_id]['duty'].remove(duty)
