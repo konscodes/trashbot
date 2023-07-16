@@ -78,7 +78,10 @@ def rotate_duty(file_path: str, duty: str) -> tuple:
         last = datetime.strptime(data['updated'], '%Y-%m-%d %H:%M:%S.%f')
         weeks, months = time_difference(last, current)
         if schedule == 'weekly':
+            print(f'team ID {team_on_duty_id}')
+            print(f'Weeks:  {weeks}')
             new_id = rotate_index(team_on_duty_id, weeks, len(data['teams']))
+            print('New ID: {new_id}')
         elif schedule == 'monthly':
             new_id = rotate_index(team_on_duty_id, months, len(data['teams']))
         data['teams'][team_on_duty_id]['duty'].remove(duty)
