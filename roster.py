@@ -70,7 +70,7 @@ def rotate_duty(file_path: str, duty: str) -> tuple:
         data = json.load(file_object)
 
     schedule = data['duties'][duty]
-    team_on_duty, team_on_duty_id, members_on_duty = check_duty(
+    team_on_duty, team_on_duty_id, members_on_duty, specific_duty = check_duty(
         file_path, duty)
 
     if team_on_duty:
