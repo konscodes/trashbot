@@ -31,7 +31,7 @@ def check_duty(file_path: str, specific_duty) -> tuple:
                 x['person']['english'] for x in team['rooms']
                 if x['person']['english'] != ''
             ]
-            return team_name, team_id, members
+            return team_name, team_id, members, specific_duty
     custom_logger.error('Duty %s is not found.', specific_duty)
     return None, -1
 
@@ -46,7 +46,7 @@ def check_schedule(duties: list, duty: str) -> str:
 
 def time_difference(start_time: object, end_time: object) -> tuple:
     '''Return the time difference between two dates in weeks and months'''
-    difference = end_time - start_time
+    difference = end_time.date() - start_time.date()
     weeks = difference.days // 7
     months = difference.days // 30
     return weeks, months
@@ -70,7 +70,7 @@ def rotate_duty(file_path: str, duty: str) -> tuple:
         data = json.load(file_object)
 
     schedule = data['duties'][duty]
-    team_on_duty, team_on_duty_id, members_on_duty = check_duty(
+    team_on_duty, team_on_duty_id, members_on_duty, specific_duty = check_duty(
         file_path, duty)
 
     if team_on_duty:
