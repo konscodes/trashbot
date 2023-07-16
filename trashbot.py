@@ -75,7 +75,7 @@ def scheduler_listener(event):
 @app.route('/')
 def test():
     '''This is a test function to check if the bot is running'''
-    custom_logger.debug('Route / test')
+    #custom_logger.debug('Route / test')
     #custom_logger.debug(f'Request headers: \n{request.headers}')
     return 'OK'
 
@@ -184,8 +184,9 @@ def handle_group_joined(event):
         line_bot_api.reply_message(event.reply_token, messages)
 
 
-def handle_rotation_all_commands(all_commands):
-    team_name, team_id, members, duty_name = all_commands
+def handle_rotation(output):
+    file_path, duty = output
+    team_name, team_id, members, duty_name = roster.check_duty(file_path, duty)
     member_names = ', '.join(members)
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
     custom_logger.info('Members: %s', member_names)
@@ -203,13 +204,12 @@ scheduler.add_listener(scheduler_listener,
 
 # Add jobs here and print pending jobs
 scheduler.add_job(
-    lambda: handle_rotation_all_commands(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
-    trigger=CronTrigger(day_of_week='mon', hour=9, timezone='Asia/Tokyo'),
+    lambda: handle_rotation(roster.rotate_duty(ROSTER_PATH, 'Garbage')),
+    trigger=CronTrigger(day_of_week='mon', hour=9, minute=45, timezone='Asia/Tokyo'),
     id='001',
     name='Duty rotation weekly')
 
-scheduler.add_job(lambda: handle_rotation_all_commands(
-    roster.rotate_duty(ROSTER_PATH, 'Groceries')),
+scheduler.add_job(lambda: roster.rotate_duty(ROSTER_PATH, 'Groceries'),
                   trigger=CronTrigger(day='1st mon',
                                       hour=9,
                                       timezone='Asia/Tokyo'),
@@ -231,7 +231,7 @@ scheduler.configure(
     job_defaults={'max_instances': 3})
 
 # Start the scheduler
-scheduler.start(paused=True)
+scheduler.start(paused=False)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

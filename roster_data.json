@@ -2,7 +2,7 @@
   "teams": [
     {
       "name": "Team 1",
-      "duty": ["Garbage"],
+      "duty": [],
       "rooms": [
         {
           "room": "B104",
@@ -22,7 +22,7 @@
     },
     {
       "name": "Team 2",
-      "duty": [],
+      "duty": ["Garbage"],
       "rooms": [
         {
           "room": "B202",
@@ -185,5 +185,5 @@
       "Groceries": "monthly",
       "Garbage": "weekly"
   },
-  "updated": "2023-06-26 22:29:25.312117"
+  "updated": "2023-07-10 09:45:00.016759"
 }

@@ -60,8 +60,9 @@ def rotate_index(index: int, number: int, list_length: int) -> int:
     return new_index
 
 
-def rotate_duty(file_path: str, duty: str) -> None:
-    '''Rotate the duty for the next team and write the updated data to file.
+def rotate_duty(file_path: str, duty: str) -> tuple:
+    '''Rotate the duty for the next team and write the updated data to file;
+    Returns file path and specific duty.
     file_path: path to the json file
     duty: duty to rotate e.g. "Garbage"
     '''
@@ -85,7 +86,7 @@ def rotate_duty(file_path: str, duty: str) -> None:
         data['updated'] = str(current)
         with open(file_path, 'w') as file_object:
             json.dump(data, file_object, indent=2, ensure_ascii=False)
-    return team_on_duty, team_on_duty_id, members_on_duty, duty
+    return file_path, duty
 
 
 if __name__ == '__main__':
