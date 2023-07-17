@@ -44,9 +44,6 @@ COMMANDS = {
     },
     '!duty': {
         'description': 'Report who is on duty'
-    },
-    '!rotate': {
-        'description': 'Rotate manually'
     }
 }
 
