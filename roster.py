@@ -21,7 +21,9 @@ def get_group_info(file_path: str) -> dict:
     '''
     with open(file_path) as file_object:
         data = json.load(file_object)
+    
     group = data['group']
+    
     return group
 
 
@@ -30,11 +32,16 @@ def update_group_info(file_path: str, name, id) -> None:
     name: name of the new group
     id: id of the new group
     '''
-    with open(file_path, 'w') as file_object:
+    with open(file_path) as file_object:
         data = json.load(file_object)
-        data['group']['name'] = name
-        data['group']['id'] = id
+    
+    data['group']['name'] = name
+    data['group']['id'] = id
+
+    # Reopen the file in write mode and write the updated data
+    with open(file_path, 'w') as file_object:
         json.dump(data, file_object, indent=2, ensure_ascii=False)
+    
     return 'OK'
 
 
@@ -42,7 +49,9 @@ def get_duties(file_path: str) -> dict:
     '''Return duties as a dict'''
     with open(file_path) as file_object:
         data = json.load(file_object)
+    
     duties = data['duties']
+    
     return duties
 
 
@@ -53,7 +62,9 @@ def check_duty(file_path: str, specific_duty) -> tuple:
     '''
     with open(file_path) as file_object:
         data = json.load(file_object)
+    
     teams = data['teams']
+    
     for team_id, team in enumerate(teams):
         if specific_duty in team['duty']:
             team_name = team['name']
@@ -62,7 +73,9 @@ def check_duty(file_path: str, specific_duty) -> tuple:
                 if x['person']['english'] != ''
             ]
             return team_name, team_id, members, specific_duty
+    
     custom_logger.error('Duty %s is not found.', specific_duty)
+    
     return None, -1
 
 
@@ -114,11 +127,14 @@ def rotate_duty(file_path: str, duty: str, force=False) -> tuple:
                 new_id = rotate_index(team_on_duty_id, weeks, len(data['teams']))
             elif schedule == 'monthly':
                 new_id = rotate_index(team_on_duty_id, months, len(data['teams']))
+        
         data['teams'][team_on_duty_id]['duty'].remove(duty)
         data['teams'][new_id]['duty'].append(duty)
         data['updated'] = str(current)
+        
         with open(file_path, 'w') as file_object:
             json.dump(data, file_object, indent=2, ensure_ascii=False)
+    
     return file_path, duty
 
 
