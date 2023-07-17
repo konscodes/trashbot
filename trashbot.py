@@ -178,7 +178,7 @@ def handle_message(event):
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
         group = roster.get_group_info(ROSTER_PATH)
-        if group['id'] is None:
+        if group['id'] == '':
             group['id'] = event.source.group_id
             custom_logger.debug('Accessing API: get group summary')
             group_summary = line_bot_api.get_group_summary(group['id'])
