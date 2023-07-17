@@ -182,8 +182,12 @@
     }
   ],
   "duties": {
-      "Groceries": "monthly",
-      "Garbage": "weekly"
+    "Groceries": "monthly",
+    "Garbage": "weekly"
+  },
+  "group": {
+    "name": "",
+    "id": ""
   },
   "updated": "2023-07-10 09:45:00.016759"
 }

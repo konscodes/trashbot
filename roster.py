@@ -15,6 +15,45 @@ from datetime import datetime
 
 custom_logger = logging.getLogger('custom')
 
+def get_group_info(file_path: str) -> dict:
+    '''Return group id and group name from JSON
+    file_path: data file with JSON
+    '''
+    with open(file_path) as file_object:
+        data = json.load(file_object)
+    
+    group = data['group']
+    
+    return group
+
+
+def update_group_info(file_path: str, name, id) -> None:
+    '''Write group info to the JSON
+    name: name of the new group
+    id: id of the new group
+    '''
+    with open(file_path) as file_object:
+        data = json.load(file_object)
+    
+    data['group']['name'] = name
+    data['group']['id'] = id
+
+    # Reopen the file in write mode and write the updated data
+    with open(file_path, 'w') as file_object:
+        json.dump(data, file_object, indent=2, ensure_ascii=False)
+    
+    return 'OK'
+
+
+def get_duties(file_path: str) -> dict:
+    '''Return duties as a dict'''
+    with open(file_path) as file_object:
+        data = json.load(file_object)
+    
+    duties = data['duties']
+    
+    return duties
+
 
 def check_duty(file_path: str, specific_duty) -> tuple:
     '''Check who is on duty and return the team name, team id and members.
@@ -23,7 +62,9 @@ def check_duty(file_path: str, specific_duty) -> tuple:
     '''
     with open(file_path) as file_object:
         data = json.load(file_object)
+    
     teams = data['teams']
+    
     for team_id, team in enumerate(teams):
         if specific_duty in team['duty']:
             team_name = team['name']
@@ -32,7 +73,9 @@ def check_duty(file_path: str, specific_duty) -> tuple:
                 if x['person']['english'] != ''
             ]
             return team_name, team_id, members, specific_duty
+    
     custom_logger.error('Duty %s is not found.', specific_duty)
+    
     return None, -1
 
 
@@ -60,7 +103,7 @@ def rotate_index(index: int, number: int, list_length: int) -> int:
     return new_index
 
 
-def rotate_duty(file_path: str, duty: str) -> tuple:
+def rotate_duty(file_path: str, duty: str, force=False) -> tuple:
     '''Rotate the duty for the next team and write the updated data to file;
     Returns file path and specific duty.
     file_path: path to the json file
@@ -75,17 +118,24 @@ def rotate_duty(file_path: str, duty: str) -> tuple:
 
     if team_on_duty:
         current = datetime.now()
-        last = datetime.strptime(data['updated'], '%Y-%m-%d %H:%M:%S.%f')
-        weeks, months = time_difference(last, current)
-        if schedule == 'weekly':
-            new_id = rotate_index(team_on_duty_id, weeks, len(data['teams']))
-        elif schedule == 'monthly':
-            new_id = rotate_index(team_on_duty_id, months, len(data['teams']))
+        
+        if force is True:
+            new_id = rotate_index(team_on_duty_id, 1, len(data['teams']))
+        else:
+            last = datetime.strptime(data['updated'], '%Y-%m-%d %H:%M:%S.%f')
+            weeks, months = time_difference(last, current)
+            if schedule == 'weekly':
+                new_id = rotate_index(team_on_duty_id, weeks, len(data['teams']))
+            elif schedule == 'monthly':
+                new_id = rotate_index(team_on_duty_id, months, len(data['teams']))
+        
         data['teams'][team_on_duty_id]['duty'].remove(duty)
         data['teams'][new_id]['duty'].append(duty)
         data['updated'] = str(current)
+        
         with open(file_path, 'w') as file_object:
             json.dump(data, file_object, indent=2, ensure_ascii=False)
+    
     return file_path, duty
 
 
