@@ -26,6 +26,7 @@ scheduler = BackgroundScheduler()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_PATH = BASE_DIR + '/logs/logger.log'
 ROSTER_PATH = BASE_DIR + '/roster_data.json'
+DUTIES = roster.get_duties(ROSTER_PATH)
 
 # Set constants
 COMMANDS = {
@@ -43,14 +44,15 @@ COMMANDS = {
     },
     '!duty': {
         'description': 'Report who is on duty'
+    },
+    '!rotate': {
+        'description': 'Rotate manually'
     }
 }
-DUTIES = {"Groceries": "monthly", "Garbage": "weekly"}
-group_info = {'id': None, 'name': ''}
 
 # Read JSON and configure logging using dictionary
-with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
+with open(BASE_DIR + '/logging_conf.json', 'r', encoding='utf-8') as file_object:
+    data = json.load(file_object)
     data['handlers']['file']['filename'] = LOG_PATH
     logging.config.dictConfig(data)
 
@@ -108,13 +110,6 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     '''This function will handle all messages sent to the bot'''
-    if event.source.type == 'group':
-        if group_info['id'] is None:
-            group_info['id'] = event.source.group_id
-            custom_logger.debug('Accessing API: get group summary')
-            group_summary = line_bot_api.get_group_summary(group_info['id'])
-            group_info['name'] = group_summary.group_name
-
     if event.message.text == '!start':
         scheduler.resume()
         custom_logger.debug(
@@ -144,27 +139,32 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,[help_message, addon_message])
         
-
     if 'trashbot' in event.message.text.lower():
         for duty_name in DUTIES.keys():
             if duty_name.lower() in event.message.text.lower():
-                team_name, team_id, members = roster.check_duty(
-                    ROSTER_PATH, duty_name)
-                member_names = ', '.join(members)
-                duty_frequency = DUTIES[duty_name]
-                custom_logger.debug('Accessing API: reply freeform message')
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    TextSendMessage(
-                        text='Ready to report!'
-                        f'\nScheduled {duty_frequency} {duty_name} '
-                        f'duty members: {member_names}'))
-                break  # Stop iterating once a matching duty is found
+                if 'rotate' in event.message.text.lower():
+                    roster.rotate_duty(ROSTER_PATH, duty_name, force=True)
+                    custom_logger.debug('Accessing API: reply freeform message')
+                    line_bot_api.reply_message(event.reply_token,
+                        TextSendMessage(text='Done! Duty rotated.'))
+                else:
+                    team_name, team_id, members, duty = roster.check_duty(
+                        ROSTER_PATH, duty_name)
+                    member_names = ', '.join(members)
+                    duty_frequency = DUTIES[duty_name]
+                    custom_logger.debug('Accessing API: reply freeform message')
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        TextSendMessage(
+                            text='Ready to report!'
+                            f'\nScheduled {duty_frequency} {duty_name} '
+                            f'duty members: {member_names}'))
+                    break  # Stop iterating once a matching duty is found
 
     if event.message.text == '!duty':
         duty_message = []
         for duty_name in DUTIES.keys():
-            team_name, team_id, members = roster.check_duty(
+            team_name, team_id, members, duty = roster.check_duty(
                 ROSTER_PATH, duty_name)
             member_names = ', '.join(members)
             duty_frequency = DUTIES[duty_name]
@@ -177,6 +177,13 @@ def handle_message(event):
 @handler.add(JoinEvent)
 def handle_group_joined(event):
     if isinstance(event.source, SourceGroup):
+        group = roster.get_group_info(ROSTER_PATH)
+        if group['id'] is None:
+            group['id'] = event.source.group_id
+            custom_logger.debug('Accessing API: get group summary')
+            group_summary = line_bot_api.get_group_summary(group['id'])
+            group['name'] = group_summary.group_name
+            roster.update_group_info(ROSTER_PATH, group['name'], group['id'])
         welcome_message = TextSendMessage(text='Thank you for adding me to this group! I\'m here to assist you with your tasks.')
         help_message = TextSendMessage(text='Try !help to see the list of available commands.')
         messages = [welcome_message, help_message]
@@ -187,15 +194,19 @@ def handle_group_joined(event):
 def handle_rotation(output):
     file_path, duty = output
     team_name, team_id, members, duty_name = roster.check_duty(file_path, duty)
+    group = roster.get_group_info(file_path)
     member_names = ', '.join(members)
     custom_logger.info('Team %s is on %s duty.', team_id, duty_name)
     custom_logger.info('Members: %s', member_names)
-    message = TextSendMessage(
-        text=f'Good morning dear people of {group_info["name"]}!'
-        f'\nTeam {team_id} is on {duty_name} duty.'
-        f'\nMembers: {member_names}')
-    custom_logger.debug('Accessing API: push message Rotation notification')
-    line_bot_api.push_message(group_info['id'], message)
+    if group['id'] == '':
+        custom_logger.error('Missing group id, unable to send push')
+    else:
+        message = TextSendMessage(
+            text=f'Good morning dear people of {group["name"]}!'
+            f'\nTeam {team_id} is on {duty_name} duty.'
+            f'\nMembers: {member_names}')
+        custom_logger.debug('Accessing API: push message Rotation notification')
+        line_bot_api.push_message(group['id'], message)
 
 
 # Add listener to log the execution for debugging purposes
