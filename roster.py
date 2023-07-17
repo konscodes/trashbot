@@ -117,10 +117,11 @@ def rotate_duty(file_path: str, duty: str, force=False) -> tuple:
         file_path, duty)
 
     if team_on_duty:
+        current = datetime.now()
+        
         if force is True:
             new_id = rotate_index(team_on_duty_id, 1, len(data['teams']))
         else:
-            current = datetime.now()
             last = datetime.strptime(data['updated'], '%Y-%m-%d %H:%M:%S.%f')
             weeks, months = time_difference(last, current)
             if schedule == 'weekly':
