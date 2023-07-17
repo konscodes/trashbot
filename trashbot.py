@@ -144,9 +144,12 @@ def handle_message(event):
             if duty_name.lower() in event.message.text.lower():
                 if 'rotate' in event.message.text.lower():
                     roster.rotate_duty(ROSTER_PATH, duty_name, force=True)
+                    team_name, team_id, members, duty = roster.check_duty(
+                        ROSTER_PATH, duty_name)
+                    member_names = ', '.join(members)
                     custom_logger.debug('Accessing API: reply freeform message')
                     line_bot_api.reply_message(event.reply_token,
-                        TextSendMessage(text='Done! Duty rotated.'))
+                        TextSendMessage(text=f'Done! Assigned members: {member_names}'))
                 else:
                     team_name, team_id, members, duty = roster.check_duty(
                         ROSTER_PATH, duty_name)
