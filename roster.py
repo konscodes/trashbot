@@ -45,6 +45,22 @@ def update_group_info(file_path: str, name, id) -> None:
     return 'OK'
 
 
+def update_date(file_path: str) -> None:
+    '''Updates the date in JSON'''
+    current = datetime.now()
+    
+    with open(file_path) as file_object:
+        data = json.load(file_object)
+    
+    data['updated'] = str(current)
+
+    # Reopen the file in write mode and write the updated data
+    with open(file_path, 'w') as file_object:
+        json.dump(data, file_object, indent=2, ensure_ascii=False)
+    
+    return 'OK'
+
+
 def get_duties(file_path: str) -> dict:
     '''Return duties as a dict'''
     with open(file_path) as file_object:
@@ -131,7 +147,6 @@ def rotate_duty(file_path: str, duty: str, force=False) -> tuple:
         
         data['teams'][team_on_duty_id]['duty'].remove(duty)
         data['teams'][new_id]['duty'].append(duty)
-        data['updated'] = str(current)
         
         with open(file_path, 'w') as file_object:
             json.dump(data, file_object, indent=2, ensure_ascii=False)

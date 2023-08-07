@@ -22,7 +22,7 @@
     },
     {
       "name": "Team 2",
-      "duty": ["Garbage"],
+      "duty": [],
       "rooms": [
         {
           "room": "B202",
@@ -102,7 +102,7 @@
     },
     {
       "name": "Team 6",
-      "duty": [],
+      "duty": ["Garbage"],
       "rooms": [
         {
           "room": "A203",
@@ -127,8 +127,8 @@
         {
           "room": "A205",
           "person": {
-            "english": "Diana",
-            "japanese": "ダヤナ"
+            "english": "Chie",
+            "japanese": "チエ"
           }
         },
         {
@@ -189,5 +189,5 @@
     "name": "",
     "id": ""
   },
-  "updated": "2023-07-10 09:45:00.016759"
+  "updated": "2023-08-07 09:45:00.002524"
 }
