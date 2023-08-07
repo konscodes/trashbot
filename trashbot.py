@@ -193,6 +193,7 @@ def handle_group_joined(event):
 
 def handle_rotation(output):
     file_path, duty = output
+    roster.update_date(file_path)
     team_name, team_id, members, duty_name = roster.check_duty(file_path, duty)
     group = roster.get_group_info(file_path)
     member_names = ', '.join(members)
@@ -219,13 +220,6 @@ scheduler.add_job(
     trigger=CronTrigger(day_of_week='mon', hour=9, minute=45, timezone='Asia/Tokyo'),
     id='001',
     name='Duty rotation weekly')
-
-scheduler.add_job(lambda: roster.rotate_duty(ROSTER_PATH, 'Groceries'),
-                  trigger=CronTrigger(day='1st mon',
-                                      hour=9,
-                                      timezone='Asia/Tokyo'),
-                  id='002',
-                  name='Duty rotation monthly')
 
 custom_logger.debug(scheduler.get_jobs())
 
